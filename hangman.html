@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        #word-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        #word-container h1 {
+            margin: 0 10px;
+            font-size: 2em;
+        }
+
+        #con {
+            display: flex;
+            align-items: center;
+        }
+
+        #guess-form input[type="text"] {
+            padding: 10px;
+            font-size: 1em;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        #guess-form input[type="submit"] {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #guess-form input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #warning {
+            color: #ff6347;
+            font-size: 1em;
+            margin: 10px 0;
+        }
+
+        #displayUsed {
+            font-size: 1em;
+            margin: 10px 0;
+        }
+
+        #mistakes {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ff6347;
+        }
+
+        #imgcon img {
+            width: 150px;
+            height: auto;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #003f7f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hangman Game</h1>
+    <div id="word-container"></div>
+    <div id="con">
+        <div>
+            <form id="guess-form">
+                <input type="text" size="5" maxlength="1" placeholder="">
+                <input type="submit" value="Guess">
+            </form>
+            <p id="warning"></p>
+            <p id="displayUsed"></p>
+            <p>Mistakes:</p>
+            <p id="mistakes">0</p>
+            <p id="go"></p>
+        </div>
+        <div id="imgcon"></div>
+    </div>
+    <button>Start Game</button>
+
+    <script>
+        const words = [
+            "apple", "banana", "chocolate", "elephant", "giraffe",
+            "hamburger", "island", "jazz", "kangaroo", "lemon", 
+            "mango", "ninja", "ocean", "penguin", "quokka", 
+            "rainbow", "strawberry", "tiger", "unicorn", "volcano",
+            "watermelon", "xylophone", "yacht", "zebra"
+        ];
+        let selected = '';
+        const elem = [];
+        const alphabet = [];
+        const used =[];
+        const stages =['stage1.png','stage2.png','stage3.png','stage4.png','stage5.png','stage6.png','stage7.png','stage8.png']
+        let mistakes = 0;
+        for (let i = 0; i < 26; i++) {
+            const letter = String.fromCharCode(97 + i);
+            alphabet.push(letter);
+        }
+        function userSelect(event) {
+            event.preventDefault();
+            const ui = document.querySelector('input').value.toLowerCase();
+            if(used.includes(ui)){
+                document.getElementById('warning').textContent='you already selected this letter';
+                document.getElementById('displayUsed').textContent= used;
+                document.getElementById('mistakes').textContent= mistakes;
+            }
+            else{
+            used.push(ui);
+            document.getElementById('displayUsed').innerText= used;
+            document.getElementById('warning').textContent='';
+            
+            document.querySelector('input').value = '';
+            let count = 0;
+            for (let i = 0; i < selected.length; i++) {
+                if (selected.charAt(i) === ui) {
+                    count++;
+                    elem[i].textContent = ui;
+                }
+            }
+            if(count == 0){
+                mistakes++;
+            }
+            const image= document.createElement('img');
+            image.src = stages[mistakes];
+            document.getElementById('imgcon').innerHTML="";
+            document.getElementById('imgcon').appendChild(image);
+            document.getElementById('mistakes').textContent= mistakes;
+            if(mistakes ===7){
+                document.getElementById('go').textContent= 'Game Over';
+                document.getElementById('word-container').innerText=selected;
+            }
+            if (mistakes === 7) {
+    mistakes = 0;
+    used.length=0;
+
+}
+        }
+        }
+
+        function chooseWord() {
+            document.getElementById('warning').textContent='';
+    document.getElementById('displayUsed').innerText= '';
+    document.getElementById('mistakes').textContent= 0;
+    document.getElementById('go').textContent= '';
+            const index = Math.floor(Math.random() * words.length);
+            selected = words[index];
+            const wordContainer = document.getElementById('word-container');
+            wordContainer.innerHTML = '';
+            elem.length = 0;
+            for (let i = 0; i < selected.length; i++) {
+                const pa = document.createElement('h1');
+                pa.textContent = '_';
+                elem.push(pa);
+                wordContainer.appendChild(pa);
+            }
+
+        }
+
+        const start = document.querySelector('button');
+        start.addEventListener('click', chooseWord);
+
+        const form = document.getElementById('guess-form');
+        form.addEventListener('submit', userSelect);
+    </script>
+</body>
+</html>

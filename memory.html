@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            color: #007bff;
+        }
+
+        #countdown {
+            font-size: 1.5em;
+            color: #ff6347;
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, td {
+            border: 2px solid #007bff;
+        }
+
+        td {
+            width: 300px;
+            height: 200px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: #e0f7fa;
+            transition: background-color 0.3s ease;
+        }
+
+        td:hover {
+            background-color: #b2ebf2;
+            cursor: pointer;
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        #score {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            background-color: #003f7f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Memory Game</h1>
+    <div>
+        <p id="countdown"></p>
+        <table id="ta">
+            <tr><td id="1"></td><td id="2"></td><td id="3"></td><td id="4"></td></tr>
+            <tr><td id="5"></td><td id="6"></td><td id="7"></td><td id="8"></td></tr>
+        </table>
+    </div>
+    <p id="score">Score: 0</p>
+    <button>Start game</button>
+    <script>
+        const images = ['apple.png', 'R.jpg', 'watermelon.png', 'pineapple.jpg'];
+        const freeBoxes = [];
+        const takenBoxes = [];
+        const past = [];
+        let count = 0;
+        let score = 0;
+        let matches = [];
+        
+        function checkMatches(matches) {
+            return matches[0].innerHTML === matches[1].innerHTML;
+        }
+        
+        function Player(event) {
+            const target = event.currentTarget;
+            const idd = target.id;
+            target.innerHTML = past[idd - 1];
+            matches.push(target);
+            count++;
+            
+            if (count === 2) {
+                count = 0;
+                if (checkMatches(matches)) {
+                    score++;
+                    document.getElementById('score').textContent = `Score: ${score}`;
+                    matches[0].removeEventListener('click',Player);
+                    matches[1].removeEventListener('click',Player);
+                    matches = [];
+                } else {
+                    setTimeout(() => {
+                        matches[0].innerHTML = '<img src="question.jpg" style="width:300px">';
+                        matches[1].innerHTML = '<img src="question.jpg" style="width:200px">';
+                        matches = [];
+                    }, 500);  
+                }
+            }
+        }
+
+        function Remove() {
+            const ques = document.querySelectorAll('#ta td');
+            for (const box of ques) {
+                past[box.id - 1] = box.innerHTML;  
+                box.innerHTML = '<img src="question.jpg" style="width:200px">';
+            }
+        }
+
+        function computerChoose() {
+            for (const image of images) {
+                for (let i = 0; i < 2; i++) {
+                    let index;
+                    do {
+                        index = Math.floor(Math.random() * freeBoxes.length);
+                    } while (takenBoxes.includes(index));
+                    
+                    freeBoxes[index].innerHTML = `<img src="${image}" style="width:200px">`;
+                    takenBoxes.push(index);
+                }
+            }
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            let timeLeft = 3;
+
+            const countdownInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    countdownElement.textContent = timeLeft;
+                    timeLeft--;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownElement.textContent = '';
+                    Remove();
+                }
+            }, 1000);
+        }
+
+        const boxes = document.querySelectorAll('#ta td');
+        for (const box of boxes) {
+            freeBoxes.push(box);
+            box.addEventListener('click', Player);
+        }
+
+        const startButton = document.querySelector('button');
+        startButton.addEventListener('click',computerChoose);
+    </script>
+</body>
+</html>
